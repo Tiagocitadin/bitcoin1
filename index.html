@@ -5,30 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acompanhamento de Preços de Criptomoedas</title>
     <style>
+        /* Reset de estilo para consistência */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 50px;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
         }
+
         h1 {
-            color: #333;
-        }
-        #price {
-            font-size: 2em;
-            color: #007BFF;
-        }
-        #status {
-            margin-top: 20px;
-            color: #28a745;
-        }
-        #currency-select, #target-price {
+            font-size: 2.5em;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
         }
-        #alert {
-            color: #FF0000;
+
+        #currency-select, #target-price {
+            width: 300px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #8bc1ee;
+            font-size: 1em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        #currency-select:hover, #target-price:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        #price {
+            font-size: 3em;
             font-weight: bold;
+            color: #00ffab;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        #status {
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            color: #28a745;
+            transition: all 0.3s ease;
+        }
+
+        #status.alert {
+            color: #ff4d4f;
+            background-color: rgba(255, 77, 79, 0.1);
+        }
+
+        #alert {
+            font-size: 1.5em;
+            color: #ff4d4f;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Botão de atualização manual */
+        #update-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #ffffff;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #update-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -42,50 +126,47 @@
         <option value="ETH">Ethereum (ETH)</option>
         <option value="LTC">Litecoin (LTC)</option>
         <option value="XRP">Ripple (XRP)</option>
-        <option value="SHIB">Shiba Inu (SHI)</option>
+        <option value="SHIB">Shiba Inu (SHIB)</option>
     </select>
 
     <!-- Campo para o usuário definir o valor alvo -->
     <label for="target-price">Defina o valor alvo (R$):</label>
-    <input type="number" id="target-price" placeholder="Ex: 180000.0" step="0.01">
+    <input type="number" id="target-price" placeholder="R$" step="0.01">
 
     <!-- Exibição do preço e status -->
     <div id="price">Carregando...</div>
     <div id="status"></div>
     <div id="alert"></div>
 
+   
     <script>
         async function fetchCryptoPrice(currency) {
             try {
-                // Faz a requisição para o backend Spring Boot
                 const response = await fetch(`http://localhost:8080/api/${currency}-price`);
                 const data = await response.json();
 
-                // Verifica se os dados da API estão corretos
                 if (data && data.ticker && data.ticker.last) {
                     const currentPrice = parseFloat(data.ticker.last);
                     if (!isNaN(currentPrice)) {
-                        // Formata o preço para moeda BRL
                         const formattedPrice = new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 10
-                        }).format(currentPrice);
+                                style: 'currency',
+                                currency: 'BRL',
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 8
+                            }).format(currentPrice);                      
 
-                        // Exibe o preço formatado
                         document.getElementById('price').innerText = formattedPrice;
 
-                        // Obtém o valor alvo inserido pelo usuário
                         const targetPriceInput = document.getElementById('target-price').value;
                         const targetPrice = parseFloat(targetPriceInput);
 
-                        // Verifica se o preço atingiu o valor alvo
                         if (!isNaN(targetPrice) && currentPrice >= targetPrice) {
                             document.getElementById('status').innerText = "🚨 Alerta: Preço atingiu o valor alvo!";
+                            document.getElementById('status').classList.add('alert');
                             document.getElementById('alert').innerText = `A moeda ${currency} atingiu o valor alvo de R$ ${targetPrice}!`;
                         } else {
                             document.getElementById('status').innerText = "Preço abaixo do valor alvo.";
+                            document.getElementById('status').classList.remove('alert');
                             document.getElementById('alert').innerText = "";
                         }
                     } else {
@@ -100,16 +181,12 @@
             }
         }
 
-        // Atualiza o preço a cada 10 segundos
         function updatePrice() {
             const currency = document.getElementById('currency-select').value;
             fetchCryptoPrice(currency);
         }
 
-        // Atualizar o preço ao mudar a moeda selecionada
         document.getElementById('currency-select').addEventListener('change', updatePrice);
-
-        // Atualizar o preço automaticamente a cada 10 segundos
         setInterval(updatePrice, 5000);
         updatePrice();
     </script>
