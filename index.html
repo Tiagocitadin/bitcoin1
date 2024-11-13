@@ -122,11 +122,39 @@
 
     <!-- Seleção da moeda -->
     <select id="currency-select">
-        <option value="BTC">Bitcoin (BTC)</option>
-        <option value="ETH">Ethereum (ETH)</option>
-        <option value="LTC">Litecoin (LTC)</option>
-        <option value="XRP">Ripple (XRP)</option>
-        <option value="SHIB">Shiba Inu (SHIB)</option>
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+            <option value="LTC">Litecoin (LTC)</option>
+            <option value="XRP">Ripple (XRP)</option>
+            <option value="SHIB">Shiba Inu (SHIB)</option>
+            <option value="ADA">Cardano (ADA)</option>
+            <option value="SOL">Solana (SOL)</option>
+            <option value="DOGE">Dogecoin (DOGE)</option>
+            <option value="DOT">Polkadot (DOT)</option>
+            <option value="MATIC">Polygon (MATIC)</option>
+            <option value="AVAX">Avalanche (AVAX)</option>
+            <option value="UNI">Uniswap (UNI)</option>
+            <option value="ATOM">Cosmos (ATOM)</option>
+            <option value="LINK">Chainlink (LINK)</option>
+            <option value="XLM">Stellar (XLM)</option>
+            <option value="BNB">Binance Coin (BNB)</option>
+            <option value="TRX">Tron (TRX)</option>
+            <option value="FTM">Fantom (FTM)</option>
+            <option value="ICP">Internet Computer (ICP)</option>
+            <option value="VET">VeChain (VET)</option>
+            <option value="FIL">Filecoin (FIL)</option>
+            <option value="ALGO">Algorand (ALGO)</option>
+            <option value="AAVE">Aave (AAVE)</option>
+            <option value="NEAR">Near Protocol (NEAR)</option>
+            <option value="EGLD">Elrond (EGLD)</option>
+            <option value="SAND">The Sandbox (SAND)</option>
+            <option value="MANA">Decentraland (MANA)</option>
+            <option value="GALA">Gala (GALA)</option>
+            <option value="AXS">Axie Infinity (AXS)</option>
+            <option value="THETA">Theta Network (THETA)</option>
+            <option value="CRV">Curve DAO Token (CRV)</option>
+            <option value="CAKE">PancakeSwap (CAKE)</option>
+               
     </select>
 
     <!-- Campo para o usuário definir o valor alvo -->
@@ -138,28 +166,31 @@
     <div id="status"></div>
     <div id="alert"></div>
 
-   
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         async function fetchCryptoPrice(currency) {
             try {
-                const response = await fetch(`http://localhost:8080/api/${currency}-price`);
-                const data = await response.json();
-
+                // Fazendo a requisição com Axios
+                const response = await axios.get(`http://localhost:8080/api/${currency}-price`);
+    
+                // Acessando os dados da resposta
+                const data = response.data;
+    
                 if (data && data.ticker && data.ticker.last) {
                     const currentPrice = parseFloat(data.ticker.last);
                     if (!isNaN(currentPrice)) {
                         const formattedPrice = new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL',
-                                minimumFractionDigits: 6,
-                                maximumFractionDigits: 8
-                            }).format(currentPrice);                      
-
+                            style: 'currency',
+                            currency: 'BRL',
+                            minimumFractionDigits: 6,
+                            maximumFractionDigits: 8
+                        }).format(currentPrice);
+    
                         document.getElementById('price').innerText = formattedPrice;
-
+    
                         const targetPriceInput = document.getElementById('target-price').value;
                         const targetPrice = parseFloat(targetPriceInput);
-
+    
                         if (!isNaN(targetPrice) && currentPrice >= targetPrice) {
                             document.getElementById('status').innerText = "🚨 Alerta: Preço atingiu o valor alvo!";
                             document.getElementById('status').classList.add('alert');
@@ -180,16 +211,18 @@
                 console.error("Erro ao obter dados da API:", error);
             }
         }
-
+    
         function updatePrice() {
             const currency = document.getElementById('currency-select').value;
             fetchCryptoPrice(currency);
         }
-
+    
         document.getElementById('currency-select').addEventListener('change', updatePrice);
         setInterval(updatePrice, 5000);
         updatePrice();
+        
     </script>
+  
 
 </body>
 </html>
